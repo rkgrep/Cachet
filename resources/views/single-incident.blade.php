@@ -34,8 +34,7 @@
                             </div>
                         </div>
                         <div class="panel-footer">
-                            Updated {{ $update->created_at_diff }}
-                            <a href="#update-{{ $update->id }}" class="pull-right"><i class="icon ion-link"></i></a>
+                            <p>Updated {{ $update->created_at_diff }}</p>
                         </div>
                     </div>
                 </div>

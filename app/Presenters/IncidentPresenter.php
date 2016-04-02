@@ -46,6 +46,16 @@ class IncidentPresenter extends BasePresenter implements Arrayable
     }
 
     /**
+     * Return the raw text of the message, even without Markdown.
+     *
+     * @return string
+     */
+    public function raw_message()
+    {
+        return strip_tags($this->formattedMessage());
+    }
+
+    /**
      * Present diff for humans date time.
      *
      * @return string
@@ -242,6 +252,16 @@ class IncidentPresenter extends BasePresenter implements Arrayable
     }
 
     /**
+     * Get the incident permalink.
+     *
+     * @return string
+     */
+    public function permalink()
+    {
+        return route('incident', $this->wrappedObject->id);
+    }
+
+    /**
      * Convert the presenter instance to an array.
      *
      * @return string[]
@@ -254,6 +274,7 @@ class IncidentPresenter extends BasePresenter implements Arrayable
             'latest_status'       => $this->latest_status(),
             'latest_human_status' => $this->latest_human_status(),
             'latest_icon'         => $this->latest_icon(),
+            'permalink'           => $this->permalink(),
             'scheduled_at'        => $this->scheduled_at(),
             'created_at'          => $this->created_at(),
             'updated_at'          => $this->updated_at(),

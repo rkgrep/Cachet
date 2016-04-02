@@ -38,6 +38,16 @@ class IncidentUpdatePresenter extends BasePresenter implements Arrayable
     }
 
     /**
+     * Return the raw text of the message, even without Markdown.
+     *
+     * @return string
+     */
+    public function raw_message()
+    {
+        return strip_tags($this->formattedMessage());
+    }
+
+    /**
      * Present diff for humans date time.
      *
      * @return string
