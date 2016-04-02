@@ -65,7 +65,6 @@ class DemoSeederCommand extends Command
         $this->seedComponents();
         $this->seedIncidents();
         $this->seedIncidentTemplates();
-        $this->seedIncidentUpdates();
         $this->seedMetricPoints();
         $this->seedMetrics();
         $this->seedSettings();
@@ -161,71 +160,31 @@ class DemoSeederCommand extends Command
      */
     protected function seedIncidents()
     {
-        $incidentMessage = <<<'EINCIDENT'
-# Of course it does!
-
-What kind of web application doesn't these days?
-
-## Headers are fun aren't they
-
-It's _exactly_ why we need Markdown. For **emphasis** and such.
-EINCIDENT;
-
         $defaultIncidents = [
             [
-                'name'         => 'Cachet supports Markdown!',
-                'message'      => $incidentMessage,
-                'status'       => 4,
+                'name'         => 'Our monkeys aren\'t performing',
+                'message'      => 'We\'re investigating an issue with our monkeys not performing as they should be.',
+                'status'       => Incident::INVESTIGATING,
                 'component_id' => 0,
                 'scheduled_at' => null,
                 'visible'      => 1,
-            ],
-            [
-                'name'         => 'Awesome',
-                'message'      => ':+1: We totally nailed the fix.',
-                'status'       => 4,
+            ], [
+                'name'         => 'This is an unresolved incident',
+                'message'      => 'Unresolved incidents are left without a **Fixed** update.',
+                'status'       => Incident::INVESTIGATING,
                 'component_id' => 0,
-                'scheduled_at' => null,
-                'visible'      => 1,
-            ],
-            [
-                'name'         => 'Monitoring the fix',
-                'message'      => ":ship: We've deployed a fix.",
-                'status'       => 3,
-                'component_id' => 0,
-                'scheduled_at' => null,
-                'visible'      => 1,
-            ],
-            [
-                'name'         => 'Update',
-                'message'      => "We've identified the problem. Our engineers are currently looking at it.",
-                'status'       => 2,
-                'component_id' => 0,
-                'scheduled_at' => null,
-                'visible'      => 1,
-            ],
-            [
-                'name'         => 'Test Incident',
-                'message'      => 'Something went wrong, with something or another.',
-                'status'       => 1,
-                'component_id' => 0,
-                'scheduled_at' => null,
-                'visible'      => 1,
-            ],
-            [
-                'name'         => 'Investigating the API',
-                'message'      => ':zap: We\'ve seen high response times from our API. It looks to be fixing itself as time goes on.',
-                'status'       => 1,
-                'component_id' => 1,
                 'scheduled_at' => null,
                 'visible'      => 1,
             ],
         ];
 
         Incident::truncate();
+        IncidentUpdate::truncate();
 
-        foreach ($defaultIncidents as $incident) {
-            Incident::create($incident);
+        foreach ($defaultIncidents as $defaultIncident) {
+            $incident = Incident::create($defaultIncident);
+
+            $this->seedIncidentUpdates($incident);
         }
     }
 
@@ -240,39 +199,42 @@ EINCIDENT;
     }
 
     /**
-     * Seed the incident updates table.
+     * Seed the incident updates table for a given incident.
      *
      * @return void
      */
-    protected function seedIncidentUpdates()
+    protected function seedIncidentUpdates($incident)
     {
-        IncidentUpdate::truncate();
-
         $defaultUpdates = [
-            [
-                'incident_id' => 1,
-                'status'      => 1,
-                'message'     => 'We are currently investigating this issue.',
-                'user_id'     => 1,
-            ], [
-                'incident_id' => 1,
-                'status'      => 2,
-                'message'     => 'We have identified the issue and are actively working on it.',
-                'user_id'     => 1,
-            ], [
-                'incident_id' => 1,
-                'status'      => 3,
-                'message'     => 'We have fixed the issue and are currently watching the fix.',
-                'user_id'     => 1,
-            ], [
-                'incident_id' => 1,
-                'status'      => 4,
-                'message'     => 'We are happy with the fix.',
-                'user_id'     => 1,
+            1 => [
+                [
+                    'status'  => Incident::FIXED,
+                    'message' => 'The monkeys are back and rested!',
+                    'user_id' => 1,
+                ], [
+                    'status'  => Incident::WATCHED,
+                    'message' => 'Our monkeys need a break from performing. They\'ll be back after a good rest.',
+                    'user_id' => 1,
+                ], [
+                    'status'  => Incident::IDENTIFIED,
+                    'message' => 'We have identified the issue with our lovely performing monkeys.',
+                    'user_id' => 1,
+                ],
+            ],
+            2 => [
+                [
+                    'status'  => Incident::WATCHED,
+                    'message' => 'We\'re actively watching this issue, so it remains unresolved.',
+                    'user_id' => 1,
+                ],
             ],
         ];
 
-        foreach ($defaultUpdates as $update) {
+        $updates = $defaultUpdates[$incident->id];
+
+        foreach ($updates as $updateId => $update) {
+            $update['incident_id'] = $incident->id;
+
             IncidentUpdate::create($update);
         }
     }
